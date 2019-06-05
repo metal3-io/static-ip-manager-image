@@ -12,8 +12,11 @@ if [ -z "$PROVISIONING_IP" ]; then
     exit 1
 fi
 
+# In case the IP has lapsed since we set it in the init container.
+/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10 || true
+
 while true; do
-    /usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10
+    /usr/sbin/ip addr change $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10
     sleep 5
 done
 

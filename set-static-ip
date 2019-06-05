@@ -14,4 +14,7 @@ fi
 
 # Get rid of any DHCP addresses etc.
 /usr/sbin/ip address flush dev $PROVISIONING_INTERFACE
-/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 30 preferred_lft 30
+# Need this to be long enough to bring up the pod with the ip refresh in it.
+# The refresh-static-ip container should lower this back to 10 seconds once it starts.
+# The only time this will actually be set for 5 minutes is if the containers fail to come up.
+/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 300 preferred_lft 300
