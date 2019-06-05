@@ -13,7 +13,7 @@ if [ -z "$PROVISIONING_IP" ]; then
 fi
 
 while true; do
-    ip dev $PROVISIONING_INTERFACE set $PROVISIONING_IP
-    sleep 5 
+    /usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10
+    sleep 5
 done
 

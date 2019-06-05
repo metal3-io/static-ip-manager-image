@@ -12,4 +12,6 @@ if [ -z "$PROVISIONING_IP" ]; then
     exit 1
 fi
 
-ip dev $PROVISIONING_INTERFACE set $PROVISIONING_IP
+# Get rid of any DHCP addresses etc.
+/usr/sbin/ip address flush dev $PROVISIONING_INTERFACE
+/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 30 preferred_lft 30
