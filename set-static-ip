@@ -12,8 +12,6 @@ if [ -z "$PROVISIONING_IP" ]; then
     exit 1
 fi
 
-# Get rid of any DHCP addresses etc.
-/usr/sbin/ip address flush dev $PROVISIONING_INTERFACE
 # Need this to be long enough to bring up the pod with the ip refresh in it.
 # The refresh-static-ip container should lower this back to 10 seconds once it starts.
 # The only time this will actually be set for 5 minutes is if the containers fail to come up.
