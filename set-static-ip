@@ -1,20 +1,24 @@
 #!/bin/bash -xe
 
-#PROVISIONING_INTERFACE='ens3'
-#PROVISIONING_IP='172.22.0.2'
-
-if [ -z "$PROVISIONING_INTERFACE" ]; then
-    echo "ERROR: PROVISIONING_INTERFACE environment variable unset."
-    exit 1
-fi
 if [ -z "$PROVISIONING_IP" ]; then
     echo "ERROR: PROVISIONING_IP environment variable unset."
     exit 1
 fi
 
-# Get rid of any DHCP addresses etc.
-/usr/sbin/ip address flush dev $PROVISIONING_INTERFACE
+if [ -z "$PROVISIONING_INTERFACE" ]; then
+  # If no provisioning interface is specified, then we're probably in
+  # the mode where the provisioning network is optional, so to avoid a
+  # hard dependency of forcing users to specify the interface, we detect
+  # which network interface has the IP's from the machine network.
+  IP_ONLY=$(echo "$PROVISIONING_IP" | cut -d/ -f1)
+  PROVISIONING_INTERFACE=$(ip route get "$IP_ONLY" | grep -Po '(?<=(dev )).*(?= src| proto)')
+else
+  # Get rid of any DHCP addresses only if we have a dedicated
+  # provisioning interface
+  /usr/sbin/ip address flush dev "$PROVISIONING_INTERFACE"
+fi
+
 # Need this to be long enough to bring up the pod with the ip refresh in it.
 # The refresh-static-ip container should lower this back to 10 seconds once it starts.
 # The only time this will actually be set for 5 minutes is if the containers fail to come up.
-/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 300 preferred_lft 300
+/usr/sbin/ip addr add "$PROVISIONING_IP" dev "$PROVISIONING_INTERFACE" valid_lft 300 preferred_lft 300
