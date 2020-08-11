@@ -11,11 +11,24 @@ if [ -z "$PROVISIONING_INTERFACE" ]; then
   # hard dependency of forcing users to specify the interface, we detect
   # which network interface has the IP's from the machine network.
   IP_ONLY=$(echo "$PROVISIONING_IP" | cut -d/ -f1)
-  PROVISIONING_INTERFACE=$(ip route get "$IP_ONLY" | grep -Po '(?<=(dev )).*(?= src| proto)')
+
+  # See if we already have the IP on an interface
+  PROVISIONING_INTERFACE=$(ip -j addr | jq -r -c ".[].addr_info[] | select(.local == \"$IP_ONLY\") | .label")
+
+  # If not, let's figure out what interface it should go on
+  if [ -z "$PROVISIONING_INTERFACE" ]; then
+    PROVISIONING_INTERFACE=$(ip -j route get "$IP_ONLY" | jq -r '.[] | select(.dev != "lo") | .dev')
+  fi
 else
   # Get rid of any DHCP addresses only if we have a dedicated
   # provisioning interface
   /usr/sbin/ip address flush dev "$PROVISIONING_INTERFACE"
+fi
+
+if [ -z "$PROVISIONING_INTERFACE" ]; then
+  ip addr show
+  echo "ERROR: Could not find suitable interface for \"$PROVISIONING_IP\""
+  exit 1
 fi
 
 # Need this to be long enough to bring up the pod with the ip refresh in it.
