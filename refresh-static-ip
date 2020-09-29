@@ -1,22 +1,23 @@
 #!/bin/bash -xe
 
 #PROVISIONING_INTERFACE='ens3'
-#PROVISIONING_IP='172.22.0.2'
+#PROVISIONING_CIDR=172.22.0.2/24
 
 if [ -z "$PROVISIONING_INTERFACE" ]; then
     echo "ERROR: PROVISIONING_INTERFACE environment variable unset."
     exit 1
 fi
-if [ -z "$PROVISIONING_IP" ]; then
-    echo "ERROR: PROVISIONING_IP environment variable unset."
+PROVISIONING_CIDR=${PROVISIONING_CIDR:-$PROVISIONING_IP}
+if [ -z "$PROVISIONING_CIDR" ]; then
+    echo "ERROR: PROVISIONING_CIDR environment variable unset."
     exit 1
 fi
 
 # In case the IP has lapsed since we set it in the init container.
-/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10 || true
+/usr/sbin/ip addr add $PROVISIONING_CIDR dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10 || true
 
 while true; do
-    /usr/sbin/ip addr change $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10
+    /usr/sbin/ip addr change $PROVISIONING_CIDR dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10
     sleep 5
 done
 

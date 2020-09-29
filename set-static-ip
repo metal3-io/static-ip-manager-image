@@ -1,14 +1,15 @@
 #!/bin/bash -xe
 
 #PROVISIONING_INTERFACE='ens3'
-#PROVISIONING_IP='172.22.0.2'
+#PROVISIONING_CIDR=172.22.0.2/24
 
 if [ -z "$PROVISIONING_INTERFACE" ]; then
     echo "ERROR: PROVISIONING_INTERFACE environment variable unset."
     exit 1
 fi
-if [ -z "$PROVISIONING_IP" ]; then
-    echo "ERROR: PROVISIONING_IP environment variable unset."
+PROVISIONING_CIDR=${PROVISIONING_CIDR:-$PROVISIONING_IP}
+if [ -z "$PROVISIONING_CIDR" ]; then
+    echo "ERROR: PROVISIONING_CIDR environment variable unset."
     exit 1
 fi
 
@@ -17,4 +18,4 @@ fi
 # Need this to be long enough to bring up the pod with the ip refresh in it.
 # The refresh-static-ip container should lower this back to 10 seconds once it starts.
 # The only time this will actually be set for 5 minutes is if the containers fail to come up.
-/usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 300 preferred_lft 300
+/usr/sbin/ip addr add $PROVISIONING_CIDR dev $PROVISIONING_INTERFACE valid_lft 300 preferred_lft 300
