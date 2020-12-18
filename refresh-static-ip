@@ -16,6 +16,9 @@ fi
 /usr/sbin/ip addr add $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10 || true
 
 while true; do
+    # Having addr_gen_mode set to 1 doesn't appear to work and
+    # ends up with the interface loosing its link-local IP periodically.
+    echo 0 > /proc/sys/net/ipv6/conf/$PROVISIONING_INTERFACE/addr_gen_mode
     /usr/sbin/ip addr change $PROVISIONING_IP dev $PROVISIONING_INTERFACE valid_lft 10 preferred_lft 10
     sleep 5
 done
