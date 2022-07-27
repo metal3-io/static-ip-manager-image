@@ -1,7 +1,9 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
- - hardys
  - imain
  - derekhiggins
  - stbenjam
+
+emeritus_approvers:
+ - hardys
